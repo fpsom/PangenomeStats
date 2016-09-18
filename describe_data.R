@@ -3,7 +3,7 @@ library(dplyr)
 library(tidyr)
 
 
-describe_mcl <- function(x){ 
+make_base_df <- function(x){ 
   
   
 # x<-("C:/Users/kaniballos/Dropbox/ampatziakas/SampleData/Dataset#1/mclOutput")
@@ -26,13 +26,27 @@ describe_mcl <- function(x){
   result_df<-bind_rows(work_list)
   rm(work_list)
   
-  
-result_df<-result_df %>% group_by(.,Cluster,Organism) %>%
-  summarise(.,Proteins=length(Protein))
+  return(result_df)
+
             
             
 }
 
-#example
-    aa<-describe_mcl(("C:/Users/kaniballos/Dropbox/ampatziakas/SampleData/Dataset#1/mclOutput"))
+cluster_composition<-function(x){
+result_df_cl1<-x %>% group_by(.,Cluster,Organism) %>%
+  summarise(.,Proteins=length(Protein))
+return(result_df_cl1)}
+
+cluster_participation<-function(x){
+  result_df_cl2<-x %>% group_by(.,Cluster) %>%
+    summarise(.,Organism_Participation=length(unique(Organism)))
+  return(result_df_cl2)}
+
+
+#examples
+aa<-make_base_df("C:/Users/kaniballos/Dropbox/ampatziakas/SampleData/Dataset#1/mclOutput")
+
+ab<-cluster_composition(aa)
+
+ac<-cluster_participation(aa)
     
