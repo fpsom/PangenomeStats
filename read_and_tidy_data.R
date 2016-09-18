@@ -8,13 +8,12 @@ library(tidyr)
 #Returns a dataframe 
 read_mcl <- function(x){ 
   
-  split_backlash<-function(x){str_split_fixed(x,"[\\\\]|[^[:print:]]" , n = Inf) # / needs to be escaped
-  }
+
   
-  work_list <-scan(file=x,what="character,",sep=" ",nlines=2, allowEscapes = TRUE)%>%
+  work_list <-scan(file=x,what="character,",sep=" ",nlines=2, allowEscapes = FALSE)%>%
     str_split_fixed(.," ", n = Inf) %>%
     sapply(.,stri_escape_unicode) %>% #Escapes all Unicode (not ASCII-printable) code points ie. single /
-    sapply(.,function(x) str_split_fixed(x,"[\\\\]|[^[:print:]]" , n = Inf)) %>%
+    sapply(.,function(x) str_split_fixed(x,"[\\\\]+t|[^[:print:]]" , n = Inf)) %>%
     lapply(.,function(x) str_split_fixed(x,"\\|", n=Inf))%>%
     lapply(., function(x) data.frame(x, stringsAsFactors=FALSE)) %>%
     lapply(.,function(x) separate(x,X1,into = c("Organism", "Protein", "Other"), sep="\\$"))
