@@ -1,6 +1,7 @@
 library(stringr)
 library(dplyr)
 library(tidyr)
+library(stringi)
 
 #pipelined
 
@@ -8,15 +9,16 @@ library(tidyr)
 #Returns a dataframe 
 read_mcl <- function(x){ 
   
-
   
-  work_list <-scan(file=x,what="character,",sep=" ",nlines=2, allowEscapes = FALSE)%>%
+  
+  work_list <-scan(file=x,what="character,",sep=" ", allowEscapes = FALSE)%>%
     str_split_fixed(.," ", n = Inf) %>%
     sapply(.,stri_escape_unicode) %>% #Escapes all Unicode (not ASCII-printable) code points ie. single /
     sapply(.,function(x) str_split_fixed(x,"[\\\\]+t|[^[:print:]]" , n = Inf)) %>%
     lapply(.,function(x) str_split_fixed(x,"\\|", n=Inf))%>%
     lapply(., function(x) data.frame(x, stringsAsFactors=FALSE)) %>%
-    lapply(.,function(x) separate(x,X1,into = c("Organism", "Protein", "Other"), sep="\\$"))
+    lapply(., function(x){colnames(x)[1] <- "x1"; x}) %>%
+    lapply(.,function(x) separate(x,x1,into = c("Organism", "Protein", "Other"), sep="\\$"))
   
   
   
@@ -38,13 +40,14 @@ read_mcl <- function(x){
   result_df$Other[nchar(result_df$Other)>3]<-NA #is this right?
   result_df$X4[nchar(result_df$X4)<3]<-NA
   
-  result_df$X2[result_df$X2==""]<-result_df$X4[result_df$X2 == "" & !is.na(result_df$X4)]
+  result_df$X2[result_df$X2== ""]<- NA
+  result_df$X2[is.na(result_df$X2)]<-result_df$X4[!is.na(result_df$X4) & is.na(result_df$X2)]
   result_df$X4[result_df$X2 == result_df$X4]<-NA
   
   if(length(is.na(result_df$X4)==TRUE)==length(result_df$X4)){ 
     
     result_df<- subset(result_df, select=-c(X4))} else{
-      result_df$X3[result_df$X3==""]<-result_df$X4[result_df$X3 == "" & !is.na(result_df$X4)]
+      result_df$X3[result_df$X3=="" & !is.na(result_df$X3)]<-result_df$X4[result_df$X3 == "" & !is.na(result_df$X4)]
       result_df$X3[result_df$X2 == result_df$X3]<-NA
       
       if(length(is.na(result_df$X4)==TRUE)==length(result_df$X4)){ 
@@ -54,11 +57,11 @@ read_mcl <- function(x){
   
   if(ncol(result_df)==6){
     colnames(result_df)<-c("Organism","Protein_Identifier","Database_Identifier","Annotation_1","Annotation_2",
-                      "Cluster") }
+                           "Cluster") }
   
   if(ncol(result_df)==7){
     colnames(result_df)<-c("Organism","Protein_Identifier","Database_Identifier","Annotation_1","Annotation_2",
-                      "Annotation_3","Cluster") }
+                           "Annotation_3","Cluster") }
   
   result_df$Annotation_1[result_df$Annotation_1==""]<-NA
   result_df$Annotation_2[result_df$Annotation_2==""]<-NA
@@ -68,7 +71,7 @@ read_mcl <- function(x){
   }
   
   return(result_df)
-  }
+}
 
 #Alternative to bind rows
 #Should speed test
@@ -77,9 +80,7 @@ read_mcl <- function(x){
 #   arrange(.,Cluster)
 
 #Bind rows
- 
+
 #Example
-aa<-read_mcl("C:/Users/kaniballos/Dropbox/ampatziakas/SampleData/Dataset#1/mclOutput")
-
-
-
+aa<-read_mcl("~/Dataset#1/mclOutput")
+x<-("~/Dataset#1/mclOutput")

@@ -1,20 +1,22 @@
 library(stringr)
 library(dplyr)
 library(tidyr)
+library(stringi)
 
 
 make_base_df <- function(x){ 
-  
+  #  x<-("~/Dataset#1/mclOutput") 
   
 # x<-("C:/Users/kaniballos/Dropbox/ampatziakas/SampleData/Dataset#1/mclOutput")
 
-  work_list <-scan(file=x,what="character,",sep=" ",nlines=2, allowEscapes = TRUE)%>%
+  work_list <-scan(file=x,what="character,n=195,",sep=" ", allowEscapes = TRUE)%>%
     str_split_fixed(.," ", n = Inf) %>%
     sapply(.,stri_escape_unicode) %>% #Escapes all Unicode (not ASCII-printable) code points ie. single /
     sapply(., function(x) str_split_fixed(x,"[\\\\]+t|[^[:print:]]" , n = Inf)) %>%
     lapply(., function(x) str_split_fixed(x,"\\|", n=Inf))%>%
     lapply(., function(x) data.frame(x, stringsAsFactors=FALSE)) %>%
-    lapply(., function(x) separate(x,X1,into = c("Organism", "Protein", "Other"), sep="\\$"))%>%
+    lapply(., function(x){colnames(x)[1] <- "x1"; x}) %>%
+    lapply(., function(x) separate(x,x1,into = c("Organism", "Protein", "Other"), sep="\\$"))%>%
     lapply(., function(x) x[,names(x) %in% c("Organism", "Protein") ])
   
   for (i in 1:length(work_list)){
@@ -44,7 +46,7 @@ cluster_participation<-function(x){
 
 
 #examples
-aa<-make_base_df("C:/Users/kaniballos/Dropbox/ampatziakas/SampleData/Dataset#1/mclOutput")
+aa<-make_base_df("~/Dataset#1/mclOutput")
 
 ab<-cluster_composition(aa)
 
