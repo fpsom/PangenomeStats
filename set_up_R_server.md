@@ -31,7 +31,8 @@ sudo apt-get -y install r-base
 
 ## Install server
 
-``` sudo apt-get install gdebi-core
+``` 
+ sudo apt-get install gdebi-core
  wget https://download2.rstudio.org/rstudio-server-0.99.903-amd64.deb
  sudo gdebi rstudio-server-0.99.903-amd64.deb
  ```
